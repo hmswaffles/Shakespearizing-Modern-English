@@ -6,26 +6,36 @@ Code has been tested with Tensorflow version 1.1.0
 - If you use the data, please consder citing "Wei Xu, Alan Ritter, William B Dolan, Ralph Grish- man, and Colin Cherry. 2012. Paraphrasing for style. In 24th International Conference on Computational Linguistics, COLING 2012."
 
 Instructions to run: </br>
-Preprocessing: 
-- Change working directory to code/main/
-- Create a new directory named 'tmp'
-- python mt_main.py preprocessing </br>
+Preprocessing:
+```bash
+cd code/main/
+mkdir tmp
+python mt_main.py preprocessing
+```
 
 Pointer model: 
-- First run pre-processing
-- Change working directory to code/main/
-- python mt_main.py train 10 pointer_model </br>
-For inference: </br>
-- Change working directory to code/main/
-- python mt_main.py inference tmp/pointer_model7.ckpt greedy </br>
+- First run pre-processing, then run training:
+```bash
+cd code/main/
+python mt_main.py train 10 pointer_model
+```
+Inference:
+```bash
+cd code/main/
+python mt_main.py inference tmp/pointer_model7.ckpt greedy
+```
 
 Normal seq2seq model: 
 - First run pre-processing
-- Change working directory to code/main/
-- python mt_main.py train 10 seq2seq </br>
-For inference: </br>
-- Change working directory to code/main/
-- python mt_main.py inference tmp/seq2seq5.ckpt greedy </br>
+```bash
+cd code/main/
+python mt_main.py train 10 seq2seq
+```
+For inference:
+```bash
+cd code/main/
+python mt_main.py inference tmp/seq2seq5.ckpt greedy
+```
 
 Post-Processing:
 There are two post-processing actions which one may be interested in performing:
