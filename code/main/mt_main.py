@@ -1,3 +1,4 @@
+from __future__ import print_function
 import tensorflow as tf
 # Set seed for reproducability
 tf.set_random_seed(1)
@@ -24,9 +25,9 @@ python mt_main.py debug
 OR 
 python mt_main.py preprocessing
 '''
-print "USAGE: "
-print usage
-print ""
+print("USAGE: ")
+print(usage)
+print("")
 ########################
 
 data_src = config.data_dir
@@ -53,20 +54,20 @@ def main():
 	params['lambd'] = config.lambd
 	params['use_context_for_out'] = config.use_context_for_out
 
-	print "PARAMS:"
+	print("PARAMS:")
 	for key,value in params.items():
-		print " -- ",key," = ",value
+		print(" -- ",key," = ",value)
 	buckets = {  0:{'max_input_seq_length':params['max_input_seq_length'], 'max_output_seq_length':params['max_output_seq_length']} }
 	#print "buckets = ",buckets
 	
 	# train
 	mode=sys.argv[1]
-	print "mode = ",mode
+	print("mode = ",mode)
 
 	########### PREPROCESSING
 	if mode=="preprocessing":
 		# preprocessing
-		print "------------------------------------------------------------------------"
+		print("------------------------------------------------------------------------")
 		preprocessing = PreProcessing()
 		splits =["train","valid","test"]
 		#for split in splits: preprocessing.loadVocab(split)
@@ -81,12 +82,16 @@ def main():
 			#print inp.shape, dinp.shape, dout.shape, dout_inp_matches.shape
 		#print "------------------------------------------------------------------------"
 		#print ""
-		pickle.dump(data,open(data_src + "data.obj","w"))
-		pickle.dump(preprocessing, open(data_src + "preprocessing.obj","w") )
+		pickle.dump(data,
+			open(data_src + "data.obj","wb"))
+		pickle.dump(preprocessing, open(data_src + "preprocessing.obj","wb") )
 		return
 	else:
-		data = pickle.load(open(data_src + "data.obj","r") )
-		preprocessing = pickle.load(open(data_src + "preprocessing.obj","r") )
+		with open(data_src + "data.obj","rb") as f:
+			data = pickle.load(f)#,encoding='latin1')
+			
+		with open(data_src + "preprocessing.obj","rb") as f:
+			preprocessing = pickle.load(f)
 
 	params['vocab_size'] = preprocessing.vocab_size
 	params['preprocessing'] = preprocessing
@@ -98,7 +103,7 @@ def main():
 	if mode=="debug":
 		lim = 64
 	else:
-		lim=params['batch_size'] * ( len(train[0])/params['batch_size'] )
+		lim=int(params['batch_size'] * ( len(train[0])/params['batch_size']))
 	if lim!=-1:
 		train_encoder_inputs, train_decoder_inputs, train_decoder_outputs, train_decoder_outputs_matching_inputs = train
 		train_encoder_inputs = train_encoder_inputs[:lim]
@@ -109,7 +114,8 @@ def main():
 		
 	#Pretrained embeddibngs
 	if params['pretrained_embeddings']:
-		pretrained_embeddings = pickle.load(open(params['pretrained_embeddings_path'],"r"))
+		with open(params['pretrained_embeddings_path'],"rb") as f:
+			pretrained_embeddings = pickle.load(f,encoding='latin1')
 		word_to_idx = preprocessing.word_to_idx
 		encoder_embedding_matrix = np.random.rand( params['vocab_size'], params['embeddings_dim'] )
 		decoder_embedding_matrix = np.random.rand( params['vocab_size'], params['embeddings_dim'] )
@@ -120,7 +126,7 @@ def main():
 				decoder_embedding_matrix[idx]=pretrained_embeddings[token]
 			else:
 				if not_found_count<10:
-					print "No pretrained embedding for (only first 10 such cases will be printed. other prints are suppressed) ",token
+					print("No pretrained embedding for (only first 10 such cases will be printed. other prints are suppressed) ",token)
 				not_found_count+=1
 		#print "not found count = ", not_found_count 
 		params['encoder_embeddings_matrix'] = encoder_embedding_matrix 
@@ -166,13 +172,13 @@ def main():
 	# INFERENCE
 	elif mode=="inference":
 		saved_model_path = sys.argv[2]
-		print "saved_model_path = ",saved_model_path
+		print("saved_model_path = ",saved_model_path)
 		inference_type = sys.argv[3] # greedy / beam
-		print "inference_type = ",inference_type
+		print("inference_type = ",inference_type)
 		params['saved_model_path'] = saved_model_path
 		rnn_model = solver.Solver(params, buckets=None, mode='inference')
 		_ = rnn_model.getModel(params, mode='inference', reuse=False, buckets=None)
-		print "----Running inference-----"
+		print("----Running inference-----")
 		
 		#val
 		val_encoder_inputs, val_decoder_inputs, val_decoder_outputs, val_decoder_outputs_matching_inputs = val
@@ -184,7 +190,7 @@ def main():
 		original_data_path = data_src + "valid.original.nltktok"
 		BLEUOutputFile_path = saved_model_path + ".valid.BLEU"
 		utilities.getBlue(validOutFile_name, original_data_path, BLEUOutputFile_path, decoder_outputs_inference, decoder_ground_truth_outputs, preprocessing)
-		print "VALIDATION: ",open(BLEUOutputFile_path,"r").read()		
+		print("VALIDATION: ",open(BLEUOutputFile_path,"r").read())		
 
 		#test
 		test_encoder_inputs, test_decoder_inputs, test_decoder_outputs, test_decoder_outputs_matching_inputs = test
@@ -195,10 +201,10 @@ def main():
 		original_data_path = data_src + "test.original.nltktok"
 		BLEUOutputFile_path = saved_model_path + ".test.BLEU"
 		utilities.getBlue(validOutFile_name, original_data_path, BLEUOutputFile_path, decoder_outputs_inference, decoder_ground_truth_outputs, preprocessing)
-		print "TEST: ",open(BLEUOutputFile_path,"r").read()		
+		print("TEST: ",open(BLEUOutputFile_path,"r").read())		
 
 	else:
-		print "Please see usage"
+		print("Please see usage")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import csv
 import configuration as config
@@ -106,13 +107,13 @@ def getBlue(validOutFile_name, original_data_path, BLEUOutputFile_path, decoder_
 	validOutFile=open(validOutFile_name,"w")
 	for outputLine,groundLine in zip(decoder_outputs_inference, decoder_ground_truth_outputs):
 		if verbose:
-			print outputLine
+			print(outputLine)
 		outputLine=preprocessing_obj.fromIdxSeqToVocabSeq(outputLine)
 		if "sentend" in outputLine:
 			outputLine=outputLine[:outputLine.index("sentend")]
 		if verbose:
-			print outputLine
-			print preprocessing_obj.fromIdxSeqToVocabSeq(groundLine)
+			print(outputLine)
+			print(preprocessing_obj.fromIdxSeqToVocabSeq(groundLine))
 		outputLine=" ".join(outputLine)+"\n"
 		validOutFile.write(outputLine)
 	validOutFile.close()

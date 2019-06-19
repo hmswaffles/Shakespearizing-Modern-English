@@ -1,3 +1,4 @@
+from __future__ import print_function
 import tensorflow as tf
 # Set seed for reproducability
 tf.set_random_seed(1)
@@ -121,6 +122,6 @@ class Demo:
 if __name__ == "__main__":
 	demo = Demo()
 	demo.loadModel("./tmp/test5.ckpt")
-	print demo.getOutput()
+	print(demo.getOutput())
 	#main("./tmp/pointer7.ckpt")
 

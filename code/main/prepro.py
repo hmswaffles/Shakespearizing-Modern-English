@@ -1,3 +1,4 @@
+from __future__ import print_function
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
 import configuration as config
@@ -61,7 +62,7 @@ class PreProcessing:
 
 	def loadVocab(self, split):
 
-		print "======================================================= loadData: split = ",split
+		print("======================================================= loadData: split = ",split)
 		inp_src = config.data_dir + split + ".original" + ".nltktok" #".modern"
 		out_src = config.data_dir + split + ".modern" + ".nltktok" #".original"
 		inp_data = open(inp_src,"r").readlines()
@@ -107,9 +108,9 @@ class PreProcessing:
 		word_counters = self.word_counters
 
 		tmp_word_counters, tmp_word_to_idx, tmp_word_to_idx_ctr, tmp_idx_to_word = self.initVocabItems()
-		print "** ",tmp_idx_to_word[1]
+		print("** ",tmp_idx_to_word[1])
 
-		print "vocab size before pruning = ", len(word_to_idx)
+		print("vocab size before pruning = ", len(word_to_idx))
 		top_items = sorted( word_counters.items(), key=lambda x:-x[1] )[:max_vocab_size]
 		for token_count in top_items:
 			token=token_count[0]
@@ -118,18 +119,18 @@ class PreProcessing:
 			tmp_word_to_idx[token] = tmp_word_to_idx_ctr
 			tmp_idx_to_word[tmp_word_to_idx_ctr] = token
 			tmp_word_to_idx_ctr+=1
-		print "** ",tmp_idx_to_word[9947]
+		print("** ",tmp_idx_to_word[9947])
 
 		self.word_to_idx = tmp_word_to_idx
 		self.idx_to_word = tmp_idx_to_word
 		self.vocab_size = len(tmp_word_to_idx)
 		self.word_to_idx_ctr = tmp_word_to_idx_ctr
-		print "vocab size after pruning = ", self.vocab_size
+		print("vocab size after pruning = ", self.vocab_size)
 
 
 	def loadData(self, split):
 
-		print "======================================================= loadData: split = ",split
+		print("======================================================= loadData: split = ",split)
 		inp_src = config.data_dir + split + ".original" + ".nltktok" #".modern"
 		out_src = config.data_dir + split + ".modern" + ".nltktok" #".original"
 		inp_data = open(inp_src,"r").readlines()
@@ -173,10 +174,10 @@ class PreProcessing:
 		sequences_input = pad_sequences(sequences_input, maxlen=config.max_input_seq_length, padding='pre', truncating='post')
 		sequences_output = pad_sequences(sequences_output, maxlen=config.max_output_seq_length, padding='post', truncating='post')
 
-		print "Printing few sample sequences... "
-		print sequences_input[0],":", self.fromIdxSeqToVocabSeq(sequences_input[0]), "---", sequences_output[0], ":", self.fromIdxSeqToVocabSeq(sequences_output[0])
-		print sequences_input[113], sequences_output[113]
-		print "================================="
+		print("Printing few sample sequences... ")
+		print(sequences_input[0],":", self.fromIdxSeqToVocabSeq(sequences_input[0]), "---", sequences_output[0], ":", self.fromIdxSeqToVocabSeq(sequences_output[0]))
+		print(sequences_input[113], sequences_output[113])
+		print("=================================")
 
 		return sequences_input, sequences_output
 
@@ -221,6 +222,6 @@ class PreProcessing:
 			indices = np.arange(encoder_inputs.shape[0])
 			np.random.seed(seed)
 			np.random.shuffle(indices)
-		print "np.sum(np.sum(np.sum(matching_input_token))) = ",np.sum(np.sum(np.sum(matching_input_token)))
+		print("np.sum(np.sum(np.sum(matching_input_token))) = ",np.sum(np.sum(np.sum(matching_input_token))))
 		return encoder_inputs, decoder_inputs, decoder_outputs, matching_input_token
 

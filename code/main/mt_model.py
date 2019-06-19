@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 from utilities import OutputSentence, TopN
@@ -8,7 +9,7 @@ class RNNModel:
 
 
 	def __init__(self, buckets_dict, mode='training',params={}):
-		print "========== INIT ============= "
+		print("========== INIT ============= ")
 		self.use_pointer = params['use_pointer']
 		self.use_reverse_encoder = params['use_reverse_encoder']
 		if mode=='training':
@@ -24,7 +25,7 @@ class RNNModel:
 				self.masker_list.append( tf.placeholder("float32", [None, max_sentence_length], name="masker"+str(bucket_num)) )
 				self.token_output_sequences_decoder_placeholder_list.append( tf.placeholder("int32", [None, max_sentence_length], name="token_output_sequences_decoder_placeholder"+str(bucket_num)) )
 				self.token_lookup_sequences_decoder_placeholder_list.append( tf.placeholder("int32", [None, max_sentence_length], name="token_lookup_sequences_decoder_placeholder"+str(bucket_num)) ) # token_lookup_sequences
-		print "========== INIT OVER ============= "
+		print("========== INIT OVER ============= ")
 
 
 	def _getEncoderInitialState(self,cell, batch_size):
@@ -159,7 +160,7 @@ class RNNModel:
 			if pretrained_embeddings!=None:
 				token_emb_mat = tf.get_variable("emb_mat", shape=[token_vocab_size, embeddings_dim], dtype='float', initializer=tf.constant_initializer(np.array(pretrained_embeddings)) )
 				token_emb_mat = tf.concat( [tf.zeros([1, embeddings_dim]), tf.slice(token_emb_mat, [1,0],[-1,-1]) ], axis=0 )	
-				print "USED  PRETRAINED MEBDDEING"	
+				print("USED  PRETRAINED MEBDDEING")	
 			else:
 				token_emb_mat = tf.get_variable("emb_mat", shape=[token_vocab_size, embeddings_dim], dtype='float')
 				# 0-mask
@@ -279,9 +280,9 @@ class RNNModel:
 	def getDecoderModel(self, config, encoder_outputs, is_training=False, mode='training', reuse=False, bucket_num=0 ):
 
 		if mode=='inference' and is_training:
-			print "ERROR. INCONSISTENT PARAMETERS"
+			print("ERROR. INCONSISTENT PARAMETERS")
 		assert mode=='inference' or mode=='training'
-		print " IN DECODER MODEL :: ",encoder_outputs[0].shape
+		print(" IN DECODER MODEL :: ",encoder_outputs[0].shape)
 
 		token_vocab_size = config['vocab_size']
 		max_sentence_length = config['max_output_seq_length']

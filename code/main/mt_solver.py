@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 import utilities
@@ -36,15 +37,15 @@ class Solver:
 		self.optimizer_typ = optimizer_typ
 		learning_rate= 0.001 #0.001
 		if mode=="train":
-			print "optimizer_typ, learning_rate= ", optimizer_typ, learning_rate
+			print("optimizer_typ, learning_rate= ", optimizer_typ, learning_rate)
 
 		if mode=='train':
 			#########################
-			print "==================================================="
+			print("===================================================")
 			for bucket_num, bucket_dct in self.buckets.items():
 				config['max_input_seq_length'] = bucket_dct['max_input_seq_length']
 				config['max_output_seq_length'] = bucket_dct['max_output_seq_length']
-				print "------------------------------------------------------------------------------------------------------------------------------------------- "
+				print("------------------------------------------------------------------------------------------------------------------------------------------- ")
 				encoder_outputs = self.model_obj.getEncoderModel(config, mode='training', reuse= reuse, bucket_num=bucket_num )
 				pred = self.model_obj.getDecoderModel(config, encoder_outputs, is_training=True, mode='training', reuse=reuse, bucket_num=bucket_num)
 				self.preds.append(pred)
@@ -147,7 +148,7 @@ class Solver:
 			step = 1
 			while step <= training_iters:
 				num_of_batches =  (n+batch_size-1)/batch_size
-				for j in range(num_of_batches):
+				for j in range(int(num_of_batches)):
 					feed_dict_cur = {}
 					for k,v in feed_dct.items():
 						feed_dict_cur[k] = v[j*batch_size:min(n,(j+1)*batch_size)]
@@ -161,15 +162,15 @@ class Solver:
 				if step % display_step == 0:
 					encoder_input_sequences, decoder_input_sequences, decoder_output_sequences, decoder_outputs_matching_inputs = val_feed_dct
 					loss = self.getLoss( config, encoder_input_sequences, decoder_input_sequences, decoder_output_sequences, token_lookup_sequences_placeholder, token_lookup_sequences_decoder_placeholder, token_output_sequences_decoder_placeholder, masker, token_output_sequences_decoder_inpmatch_placeholder, decoder_outputs_matching_inputs, cost, sentinel_cost, sess)
-					print "step ",step," : loss = ",loss
+					print("step ",step," : loss = ",loss)
 					bleu = self.getBleuOnVal( config, reverse_vocab, val_feed_dct, sess, model_name)
-					print "step ",step," : bleu = ",bleu
+					print("step ",step," : bleu = ",bleu)
 				if step % sample_step == 0:
-  					self.runInference( config, encoder_inputs[:batch_size], decoder_outputs[:batch_size], reverse_vocab, sess )
+					self.runInference( config, encoder_inputs[:batch_size], decoder_outputs[:batch_size], reverse_vocab, sess )
 				if step%save_step==0:
 					save_path = saver.save(sess, "./tmp/" + model_name + str(step) + ".ckpt")
 					# save_path = saver.save(sess, "./tmp/" + model_name + ".ckpt") # SAVE LATEST
-	  				print "Model saved in file: ",save_path
+					print("Model saved in file: ",save_path)
 				step += 1
 
 		self.saver = saver
@@ -191,17 +192,18 @@ class Solver:
 				for i,row in enumerate(decoder_outputs_inference):
 					ret=""
 					for val in row:
-					        if val==2: break # sentend. TO DO: load this value from config
+						if val==2:
+							break # sentend. TO DO: load this value from config
 						ret+=( " " + reverse_vocab[val] )
-					#print "decoder_ground_truth_outputs[i] = ",decoder_ground_truth_outputs[i]
-                                        if i<len(decoder_ground_truth_outputs):
-                                                if print_gt:
-					                gt = [ reverse_vocab[j] for j in decoder_ground_truth_outputs[i] if reverse_vocab[j]!="padword"]
-					                print "GT: ", gt
-					        print "prediction: ",ret
-					        print ""
-					        if i>20:
-					                break
+				#print "decoder_ground_truth_outputs[i] = ",decoder_ground_truth_outputs[i]
+						if i<len(decoder_ground_truth_outputs):
+							if print_gt:
+								gt = [ reverse_vocab[j] for j in decoder_ground_truth_outputs[i] if reverse_vocab[j]!="padword"]
+								print("GT: ", gt)
+						print("prediction: ",ret)
+						print("")
+					if i>20:
+						break
 			return decoder_outputs_inference, alpha_inference
 		elif typ=="beam":
 			pass
@@ -214,13 +216,13 @@ class Solver:
 	def solveAll(self, config, encoder_inputs, decoder_ground_truth_outputs, reverse_vocab, sess=None, print_progress=True, inference_type="greedy"): # sampling
 		
 		if print_progress:
-			print " SolveAll ...... ============================================================" 
+			print(" SolveAll ...... ============================================================") 
 
 		if sess==None:
-	  		sess = tf.Session()
-	  		saver = tf.train.Saver()
+			sess = tf.Session()
+			saver = tf.train.Saver()
 			saved_model_path = config['saved_model_path']
-	  		saver.restore(sess,  saved_model_path ) #"./tmp/model39.ckpt")
+			saver.restore(sess,  saved_model_path ) #"./tmp/model39.ckpt")
 
 		if inference_type=="greedy":
 			batch_size = config['batch_size']
@@ -234,9 +236,9 @@ class Solver:
 		alpha = []
 		for i in range(num_batches):
 			if print_progress:
-				print "i= ",i
+				print("i= ",i)
 			encoder_inputs_cur = encoder_inputs[i*batch_size:(i+1)*batch_size]
-                        decoder_ground_truth_cur = decoder_ground_truth_outputs[i*batch_size:(i+1)*batch_size]
+			decoder_ground_truth_cur = decoder_ground_truth_outputs[i*batch_size:(i+1)*batch_size]
 			lim = len(encoder_inputs_cur)
 			if len(encoder_inputs_cur)<batch_size:
 				gap = batch_size - len(encoder_inputs_cur)
@@ -245,21 +247,21 @@ class Solver:
 			if inference_type=="greedy":
 				decoder_outputs_inference_cur, alpha_cur = self.runInference(config, encoder_inputs_cur, decoder_ground_truth_cur, reverse_vocab, sess=sess, print_all=print_progress, print_gt=print_progress)
 				decoder_outputs_inference.extend( decoder_outputs_inference_cur[:lim] )
-                                alpha.extend(alpha_cur[:lim])
+				alpha.extend(alpha_cur[:lim])
 			else:
 				pass
-                
-                #Printing out attention matrix - Required for UNK replacement during post-processing
-                import pickle
-                pickle.dump(alpha,open("alpha.p","wb"))
-                print "Dumped alphas"
+				
+				#Printing out attention matrix - Required for UNK replacement during post-processing
+				import pickle
+				pickle.dump(alpha,open("alpha.p","wb"))
+				print("Dumped alphas")
 
 		return decoder_outputs_inference, decoder_ground_truth_outputs
 
 	###################################################################################
 
 	def getLoss(self, config, encoder_input_sequences, decoder_input_sequences, decoder_output_sequences, enc_inp_placeholder, dec_in_placeholder, dec_out_placeholder, mask_placeholder, token_output_sequences_decoder_inpmatch_placeholder, decoder_outputs_matching_inputs, loss_variable, sentinel_loss_variable, sess): # Probabilities
-		print " getLoss ...... ============================================================"
+		print(" getLoss ...... ============================================================")
 		batch_size = config['batch_size']
 		num_batches = ( len(encoder_input_sequences) + batch_size - 1)/ batch_size 
 		loss = []
